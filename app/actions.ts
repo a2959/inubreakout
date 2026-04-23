@@ -11,17 +11,23 @@ export async function saveGameRecord(name: string, finishTime: string) {
   try {
     const timestamp = new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
     
+    const body = JSON.stringify({
+      timestamp: timestamp,
+      name: name,
+      finishtime: finishTime
+    });
+    
+    console.log("Saving record to GAS:", body);
+    
     const response = await fetch(GAS_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        timestamp: timestamp,
-        name: name,
-        finishtime: finishTime
-      }),
+      body: body,
     });
+
+    console.log("GAS Response Status:", response.status);
 
     if (response.ok) {
       return { success: true };
