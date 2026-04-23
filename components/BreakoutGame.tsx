@@ -15,6 +15,27 @@ const BRICK_HEIGHT = 24;
 
 type GameState = 'IDLE' | 'PLAYING' | 'PAUSED' | 'GAMEOVER' | 'VICTORY';
 
+interface Brick {
+  x: number;
+  y: number;
+  status: number;
+  color: string;
+  width: number;
+}
+
+interface Particle {
+  x: number;
+  y: number;
+  dx: number;
+  dy: number;
+  color: string;
+  size: number;
+  rotation: number;
+  rotationSpeed: number;
+  life: number;
+  decay: number;
+}
+
 export default function BreakoutGame() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [gameState, setGameState] = useState<GameState>('IDLE');
@@ -30,9 +51,9 @@ export default function BreakoutGame() {
   
   const ball = useRef({ x: 0, y: 0, dx: 4, dy: -4 });
   const paddle = useRef({ x: 0 });
-  const bricks = useRef<any[]>([]);
+  const bricks = useRef<Brick[][]>([]);
   const animationFrameId = useRef<number>(0);
-  const particles = useRef<any[]>([]);
+  const particles = useRef<Particle[]>([]);
   const keys = useRef({ left: false, right: false });
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioContext = useRef<AudioContext | null>(null);
@@ -129,7 +150,7 @@ export default function BreakoutGame() {
       dy: -3
     };
 
-    const tempBricks = [];
+    const tempBricks: Brick[][] = [];
     const canvasWidth = canvas.width;
     const availableWidth = canvasWidth - (BRICK_OFFSET_LEFT * 2);
     const brickWidth = (availableWidth - (BRICK_COLS - 1) * BRICK_PADDING) / BRICK_COLS;
@@ -279,10 +300,10 @@ export default function BreakoutGame() {
     };
 
     const drawBricks = () => {
-      bricks.current.forEach((column, c) => {
-        column.forEach((brick: any, r: number) => {
+      bricks.current.forEach((column) => {
+        column.forEach((brick: Brick, r: number) => {
           if (brick.status === 1) {
-            const brickX = c * (brick.width + BRICK_PADDING) + BRICK_OFFSET_LEFT;
+            const brickX = (bricks.current.indexOf(column)) * (brick.width + BRICK_PADDING) + BRICK_OFFSET_LEFT;
             const brickY = r * (BRICK_HEIGHT + BRICK_PADDING) + BRICK_OFFSET_TOP;
             brick.x = brickX;
             brick.y = brickY;
@@ -379,7 +400,7 @@ export default function BreakoutGame() {
       // Collision detection
       let activeBricks = 0;
       bricks.current.forEach((column) => {
-        column.forEach((brick: any) => {
+        column.forEach((brick: Brick) => {
           if (brick.status === 1) {
             activeBricks++;
             if (
